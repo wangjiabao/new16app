@@ -703,11 +703,11 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 
 	tmpBuyType := "0"
 	if 2000 <= myUser.Amount {
-		tmpBuyType = "1"
+		tmpBuyType = "3"
 	} else if 1000 <= myUser.Amount {
 		tmpBuyType = "2"
 	} else if 500 <= myUser.Amount {
-		tmpBuyType = "3"
+		tmpBuyType = "1"
 	}
 
 	now := time.Now()
