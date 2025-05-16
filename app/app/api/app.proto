@@ -399,53 +399,29 @@ message UserInfoRequest {
 }
 
 message UserInfoReply {
-	string status = 11;
+	string status = 111;
+	uint64 today = 15; // 今日时间戳
 
-	string one = 1; // 利润钱包
-	string two = 2;// 本金钱包
-	string three = 3; // 总认购
-	string four = 4; // 带释放
-	string fourOne = 5; // 已释放
-	string raw = 30;
+	uint64 level = 14; // 级别
+	string one = 1; // 静态收益
+	string two = 2; // 分享收益
+	string three = 3; // 团队收益
+	string four = 4; // 平级收益
+	string total = 5; // 累计收益
+	string buyType = 6; // 1，2，3 小中大 节点
 
-	string myAddress = 14; // 我的地址
-	string inviteUserAddress = 15; // 我的直推人地址
-	uint64 level = 6; // 我的vip级别
+	string balance = 12; // 币余额
+	string withdrawMin = 7; // 币最小提现
+	string withdrawRate = 10; // 币提现手续费
 
-	double price = 7; // hb价格
-	string five = 8; // 推广奖池
-	string six = 9; // 绩效奖池
-
-	string seven = 10; // 直推激活奖励
-
-	double withdrawMin = 13; // 最大提现
-	double withdrawMax = 12; // 最小提现
-
-	string fiveOne = 21;// 静态奖励
-	string fiveTwo = 22;// 直推奖励
-	string fiveThree = 23;// 团队奖励
-	string fiveFour = 24;// 大区业绩
-	string fiveFive = 25;// 小区业绩
-	string fiveSix = 26;// 总业绩
-
-	repeated List list = 31; // 前三名 绩效
-	message List {
-		string address = 3; // 地址
-		string amount = 2; // 绩效
-		string reward = 1; // 奖励金额
-	}
-
-	repeated ListTwo listTwo = 32; // 前三名 推广
-	message ListTwo {
-		string address = 3; // 地址
-		uint64 num = 2; // 人数
-		string reward = 1; // 奖励金额
-	}
+	string balanceUsdt = 13; // usdt余额
+	string withdrawMinUsdt = 8; // 最小提现usdt
+	string withdrawRateUsdt = 11; // 提现手续费usdt
 }
 
 message RewardListRequest {
 	uint64 page = 1; // 页数
-	uint64 reqType = 2; // 类型：1充值，2直推奖1代，3直推奖2代，4推荐奖，5团队奖，6推广奖，6绩效奖
+	uint64 reqType = 2; // 类型：1认购，2节点收益，3推荐收益，4静态收益，5分享收益，6团队收益，7平级收益
 }
 
 message RewardListReply {
@@ -455,7 +431,8 @@ message RewardListReply {
 	message List {
 		string createdAt = 1; // 时间
 		string amount = 2; // 金额
-		string address = 3;
+		string address = 3; // 下级地址
+		uint64 num = 5; // 代数
 	}
 }
 
@@ -512,6 +489,7 @@ message SetTodayListReply {
 
 message WithdrawListRequest {
 	uint64 page = 1; // 页数
+	string withdrawType = 2;
 }
 
 message WithdrawListReply {
@@ -521,6 +499,7 @@ message WithdrawListReply {
 	message List {
 		string createdAt = 1; // 时间
 		string amount = 2; // 金额
+		string fee = 3;
 	}
 }
 
@@ -570,16 +549,17 @@ message RecommendListRequest {
 }
 
 message RecommendListReply {
-	string status = 6;
-	uint64 level = 5; // 等级
-	uint64 totalNum = 2; // 直推人数
-	uint64 totalTeamNum = 3; // 团队总人数
-	double totalAmount = 4; // 团队总业绩
+	string status = 8;
+	uint64 buyStatus = 6; // 激活状态：1激活
+	uint64 totalNum = 2; // 直推激活
+	uint64 totalTeamNum = 5; // 团队激活
+	string recommendAddress = 3; // 推荐人
+	string totalAmount = 4; // 总业绩
+	uint64 totalTeam = 7; // 分享节点
 	repeated List recommends = 1;
 	message List {
-		string address = 1;
-		string amount = 2;
-		string createdAt = 3;
+		string address = 1; // 地址
+		uint64 amount = 2; // 金额
 	}
 }
 
@@ -602,6 +582,7 @@ message WithdrawRequest {
 	message SendBody{
 		uint64 amount = 1;
 		string sign = 4;
+		string withdrawType = 2;
 	}
 
 	SendBody send_body = 1;

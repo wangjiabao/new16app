@@ -36,12 +36,17 @@ type User struct {
 	AmountUsdt             float64   `gorm:"type:decimal(65,20);not null"`
 	MyTotalAmount          float64   `gorm:"type:decimal(65,20);not null"`
 	AmountUsdtGet          float64   `gorm:"type:decimal(65,20);not null"`
+	AmountUsdtOrigin       float64   `gorm:"type:decimal(65,20);not null"`
 	AmountRecommendUsdtGet float64   `gorm:"type:decimal(65,20);not null"`
 	Last                   uint64    `gorm:"type:bigint;not null"`
 	LastBiw                uint64    `gorm:"type:bigint;not null"`
 	RecommendUserReward    int64     `gorm:"type:int;not null"`
 	RecommendUser          int64     `gorm:"type:int;not null"`
 	RecommendUserH         int64     `gorm:"type:int;not null"`
+	One                    float64   `gorm:"type:decimal(65,20);not null"`
+	Two                    float64   `gorm:"type:decimal(65,20);not null"`
+	Three                  float64   `gorm:"type:decimal(65,20);not null"`
+	Four                   float64   `gorm:"type:decimal(65,20);not null"`
 }
 
 type Total struct {
@@ -313,15 +318,18 @@ func (u *UserRepo) GetUserByAddress(ctx context.Context, address string) (*biz.U
 	}
 
 	return &biz.User{
-		ID:         user.ID,
-		Address:    user.Address,
-		Password:   user.Password,
-		IsDelete:   user.IsDelete,
-		AmountUsdt: user.AmountUsdt,
-		OutRate:    uint64(user.OutRate),
-		Lock:       user.Lock,
-		Vip:        user.Vip,
-		VipAdmin:   user.VipAdmin,
+		ID:               user.ID,
+		Address:          user.Address,
+		Password:         user.Password,
+		IsDelete:         user.IsDelete,
+		AmountUsdt:       user.AmountUsdt,
+		Amount:           user.Amount,
+		AmountBiw:        user.AmountBiw,
+		OutRate:          uint64(user.OutRate),
+		Lock:             user.Lock,
+		Vip:              user.Vip,
+		VipAdmin:         user.VipAdmin,
+		AmountUsdtOrigin: user.AmountUsdtOrigin,
 	}, nil
 }
 
@@ -976,6 +984,10 @@ func (u *UserRepo) GetUserById(ctx context.Context, Id int64) (*biz.User, error)
 		RecommendUser:          user.RecommendUser,
 		RecommendUserReward:    user.RecommendUserReward,
 		RecommendUserH:         user.RecommendUserH,
+		One:                    user.One,
+		Two:                    user.Two,
+		Three:                  user.Three,
+		Four:                   user.Four,
 	}, nil
 }
 
@@ -1496,6 +1508,7 @@ func (ur *UserRecommendRepo) GetUserRecommendByCode(ctx context.Context, code st
 			UserId:        userRecommend.UserId,
 			RecommendCode: userRecommend.RecommendCode,
 			CreatedAt:     userRecommend.CreatedAt,
+			Total:         userRecommend.Total,
 		})
 	}
 
@@ -1504,14 +1517,14 @@ func (ur *UserRecommendRepo) GetUserRecommendByCode(ctx context.Context, code st
 
 // GetUserRecommendLikeCodeSum .
 func (ur *UserRecommendRepo) GetUserRecommendLikeCodeSum(ctx context.Context, code string) (int64, error) {
-	var total UserBalanceTotal
-	if err := ur.data.db.Where("recommend_code Like ?", code+"%").Table("user_recommend").Select("count(id) as total").Take(&total).Error; err != nil {
+	var total UserRecommendTotal
+	if err := ur.data.db.Where("recommend_code Like ?", code+"%").Where("total>?", 0).Table("user_recommend").Select("count(id) as total_num").Take(&total).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return 0, errors.NotFound("USER_BALANCE_RECORD_NOT_FOUND", "user balance not found")
 		}
 	}
 
-	return total.Total, nil
+	return total.TotalNum, nil
 }
 
 // GetUserRecommendLikeCode .
@@ -2465,6 +2478,35 @@ func (ub *UserBalanceRepo) WithdrawUsdt2(ctx context.Context, userId int64, amou
 	return nil
 }
 
+// WithdrawUsdt22 .
+func (ub *UserBalanceRepo) WithdrawUsdt22(ctx context.Context, userId int64, amount float64) error {
+	var err error
+	if res := ub.data.DB(ctx).Table("user_balance").
+		Where("user_id=? and balance_raw_float>=?", userId, amount).
+		Updates(map[string]interface{}{"balance_raw_float": gorm.Expr("balance_raw_float - ?", amount)}); 0 == res.RowsAffected || nil != res.Error {
+		return errors.NotFound("user balance err", "user balance error")
+	}
+
+	var userBalance UserBalance
+	err = ub.data.DB(ctx).Where(&UserBalance{UserId: userId}).Table("user_balance").First(&userBalance).Error
+	if err != nil {
+		return err
+	}
+
+	var userBalanceRecode UserBalanceRecord
+	userBalanceRecode.Balance = userBalance.BalanceUsdt
+	userBalanceRecode.UserId = userBalance.UserId
+	userBalanceRecode.Type = "withdraw"
+	userBalanceRecode.CoinType = "RAW"
+	userBalanceRecode.AmountNew = amount
+	err = ub.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // GetRewardBuyYes .
 func (ub *UserBalanceRepo) GetRewardBuyYes(ctx context.Context) ([]*biz.Reward, error) {
 	var rewards []*Reward
@@ -2981,10 +3023,19 @@ func (ub *UserBalanceRepo) GreateWithdraw(ctx context.Context, userId int64, rel
 	if res.Error != nil {
 		return nil, errors.New(500, "CREATE_WITHDRAW_ERROR", "提现记录创建失败")
 	}
-	res = ub.data.DB(ctx).Table("total").Where("id=?", 1).
-		Updates(map[string]interface{}{"three": gorm.Expr("three + ?", amount)})
-	if res.Error != nil {
-		return nil, errors.New(500, "UPDATE_USER_ERROR", "one信息修改失败")
+
+	if "USDT" == coinType {
+		res = ub.data.DB(ctx).Table("total").Where("id=?", 1).
+			Updates(map[string]interface{}{"three": gorm.Expr("three + ?", amount)})
+		if res.Error != nil {
+			return nil, errors.New(500, "UPDATE_USER_ERROR", "one信息修改失败")
+		}
+	} else {
+		res = ub.data.DB(ctx).Table("total").Where("id=?", 1).
+			Updates(map[string]interface{}{"two": gorm.Expr("two + ?", amount)})
+		if res.Error != nil {
+			return nil, errors.New(500, "UPDATE_USER_ERROR", "one信息修改失败")
+		}
 	}
 
 	var (
@@ -3067,10 +3118,10 @@ func (ub *UserBalanceRepo) GetWithdrawByUserId2(ctx context.Context, userId int6
 }
 
 // GetWithdrawByUserId .
-func (ub *UserBalanceRepo) GetWithdrawByUserId(ctx context.Context, userId int64, b *biz.Pagination) ([]*biz.Withdraw, error) {
+func (ub *UserBalanceRepo) GetWithdrawByUserId(ctx context.Context, userId int64, coin string, b *biz.Pagination) ([]*biz.Withdraw, error) {
 	var withdraws []*Withdraw
 	res := make([]*biz.Withdraw, 0)
-	if err := ub.data.db.Where("user_id=?", userId).Scopes(Paginate(b.PageNum, b.PageSize)).Table("withdraw").Find(&withdraws).Error; err != nil {
+	if err := ub.data.db.Where("user_id=?", userId).Where("type=?", coin).Scopes(Paginate(b.PageNum, b.PageSize)).Table("withdraw").Find(&withdraws).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return res, errors.NotFound("WITHDRAW_NOT_FOUND", "withdraw not found")
 		}
@@ -3088,6 +3139,7 @@ func (ub *UserBalanceRepo) GetWithdrawByUserId(ctx context.Context, userId int64
 			Status:          withdraw.Status,
 			Type:            withdraw.Type,
 			AmountNew:       withdraw.AmountNew,
+			RelAmountNew:    withdraw.RelAmountNew,
 			CreatedAt:       withdraw.CreatedAt,
 		})
 	}
@@ -3968,6 +4020,10 @@ func (ub UserBalanceRepo) GetUserBalanceByUserIds(ctx context.Context, userIds .
 
 type UserBalanceTotal struct {
 	Total int64
+}
+
+type UserRecommendTotal struct {
+	TotalNum int64
 }
 
 type UserSortRecommendReward struct {

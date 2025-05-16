@@ -710,6 +710,10 @@ paths:
                   in: query
                   schema:
                     type: string
+                - name: withdrawType
+                  in: query
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK
@@ -882,15 +886,18 @@ components:
             properties:
                 status:
                     type: string
-                level:
+                buyStatus:
                     type: string
                 totalNum:
                     type: string
                 totalTeamNum:
                     type: string
+                recommendAddress:
+                    type: string
                 totalAmount:
-                    type: number
-                    format: double
+                    type: string
+                totalTeam:
+                    type: string
                 recommends:
                     type: array
                     items:
@@ -901,8 +908,6 @@ components:
                 address:
                     type: string
                 amount:
-                    type: string
-                createdAt:
                     type: string
         RecommendRewardListReply:
             type: object
@@ -955,6 +960,8 @@ components:
                 amount:
                     type: string
                 address:
+                    type: string
+                num:
                     type: string
         SetBalanceRewardReply:
             type: object
@@ -1112,6 +1119,10 @@ components:
             properties:
                 status:
                     type: string
+                today:
+                    type: string
+                level:
+                    type: string
                 one:
                     type: string
                 two:
@@ -1120,68 +1131,21 @@ components:
                     type: string
                 four:
                     type: string
-                fourOne:
+                total:
                     type: string
-                raw:
+                buyType:
                     type: string
-                myAddress:
-                    type: string
-                inviteUserAddress:
-                    type: string
-                level:
-                    type: string
-                price:
-                    type: number
-                    format: double
-                five:
-                    type: string
-                six:
-                    type: string
-                seven:
+                balance:
                     type: string
                 withdrawMin:
-                    type: number
-                    format: double
-                withdrawMax:
-                    type: number
-                    format: double
-                fiveOne:
                     type: string
-                fiveTwo:
+                withdrawRate:
                     type: string
-                fiveThree:
+                balanceUsdt:
                     type: string
-                fiveFour:
+                withdrawMinUsdt:
                     type: string
-                fiveFive:
-                    type: string
-                fiveSix:
-                    type: string
-                list:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/UserInfoReply_List'
-                listTwo:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/UserInfoReply_ListTwo'
-        UserInfoReply_List:
-            type: object
-            properties:
-                address:
-                    type: string
-                amount:
-                    type: string
-                reward:
-                    type: string
-        UserInfoReply_ListTwo:
-            type: object
-            properties:
-                address:
-                    type: string
-                num:
-                    type: string
-                reward:
+                withdrawRateUsdt:
                     type: string
         WithdrawListReply:
             type: object
@@ -1201,6 +1165,8 @@ components:
                     type: string
                 amount:
                     type: string
+                fee:
+                    type: string
         WithdrawReply:
             type: object
             properties:
@@ -1212,6 +1178,8 @@ components:
                 amount:
                     type: string
                 sign:
+                    type: string
+                withdrawType:
                     type: string
 tags:
     - name: App
