@@ -657,11 +657,13 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 		withdrawMinUsdt float64
 		withdrawRate    float64
 		withdrawRateB   = float64(0.05)
+		fiveTwo         uint64
+		fiveOne         float64
 	)
 
 	// 配置
 	configs, err = uuc.configRepo.GetConfigByKeys(ctx,
-		"withdraw_amount_min_usdt", "withdraw_amount_min", "withdraw_rate_usdt",
+		"withdraw_amount_min_usdt", "withdraw_amount_min", "withdraw_rate_usdt", "five_two", "five_one",
 	)
 	if nil != configs {
 		for _, vConfig := range configs {
@@ -675,6 +677,13 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 
 			if "withdraw_amount_min" == vConfig.KeyName {
 				withdrawMin, _ = strconv.ParseFloat(vConfig.Value, 10)
+			}
+
+			if "five_two" == vConfig.KeyName {
+				fiveTwo, _ = strconv.ParseUint(vConfig.Value, 10, 64)
+			}
+			if "five_one" == vConfig.KeyName {
+				fiveOne, _ = strconv.ParseFloat(vConfig.Value, 10)
 			}
 		}
 	}
@@ -694,11 +703,51 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 		return nil, err
 	}
 
+	// 推荐
+	var (
+		userRecommend   *UserRecommend
+		myUserRecommend []*UserRecommend
+	)
+	userRecommend, err = uuc.urRepo.GetUserRecommendByUserId(ctx, user.ID)
+	if nil == userRecommend {
+		return nil, err
+	}
+
+	myUserRecommend, err = uuc.urRepo.GetUserRecommendByCode(ctx, userRecommend.RecommendCode+"D"+strconv.FormatInt(user.ID, 10))
+	if nil == myUserRecommend || nil != err {
+		return nil, err
+	}
+
 	tmpVip := uint64(0)
 	if 0 < myUser.VipAdmin {
 		tmpVip = uint64(myUser.VipAdmin)
 	} else {
-		tmpVip = uint64(myUser.Vip)
+		if int(fiveTwo) <= len(myUserRecommend) && fiveOne <= myUser.AmountUsdtGet {
+			if 1500000 <= myUser.AmountUsdtOrigin {
+				tmpVip = 5
+			} else if 500000 <= myUser.AmountUsdtOrigin {
+				tmpVip = 4
+			} else if 150000 <= myUser.AmountUsdtOrigin {
+				tmpVip = 3
+			} else if 50000 <= myUser.AmountUsdtOrigin {
+				tmpVip = 2
+			} else {
+				tmpVip = 1
+			}
+
+			tmpLevel := uint64(1)
+			if 2000 <= myUser.Amount {
+				tmpLevel = 4
+			} else if 1000 <= myUser.Amount {
+				tmpLevel = 3
+			} else if 500 <= myUser.Amount {
+				tmpLevel = 2
+			}
+
+			if tmpLevel > tmpVip {
+				tmpVip = tmpLevel
+			}
+		}
 	}
 
 	tmpBuyType := "0"

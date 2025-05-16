@@ -976,6 +976,7 @@ func (u *UserRepo) GetUserById(ctx context.Context, Id int64) (*biz.User, error)
 		AmountUsdt:             user.AmountUsdt,
 		MyTotalAmount:          user.MyTotalAmount,
 		AmountUsdtGet:          user.AmountUsdtGet,
+		AmountUsdtOrigin:       user.AmountUsdtOrigin,
 		AmountRecommendUsdtGet: user.AmountRecommendUsdtGet,
 		UpdatedAt:              user.UpdatedAt,
 		Last:                   user.Last,
