@@ -710,10 +710,12 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 		tmpBuyType = "3"
 	}
 
+	now := time.Now()
+	tmpToday := time.Date(now.Year(), now.Month(), now.Day(), 16, 0, 0, 0, time.UTC).Unix()
 	tmpTotal := myUser.One + myUser.Two + myUser.Three + myUser.Four
 	return &v1.UserInfoReply{
 		Status:           "ok",
-		Today:            0,
+		Today:            uint64(tmpToday),
 		Level:            tmpVip,
 		One:              fmt.Sprintf("%.2f", myUser.One),
 		Two:              fmt.Sprintf("%.2f", myUser.Two),
