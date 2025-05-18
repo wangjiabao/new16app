@@ -1135,6 +1135,10 @@ components:
                     type: string
                 buyType:
                     type: string
+                six:
+                    type: string
+                seven:
+                    type: string
                 balance:
                     type: string
                 withdrawMin:

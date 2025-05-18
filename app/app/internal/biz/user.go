@@ -766,6 +766,8 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 		Status:           "ok",
 		Today:            uint64(tmpToday),
 		Level:            tmpVip,
+		Six:              fmt.Sprintf("%.2f", myUser.AmountUsdt),
+		Seven:            fmt.Sprintf("%.2f", myUser.AmountUsdtGet),
 		One:              fmt.Sprintf("%.2f", myUser.One),
 		Two:              fmt.Sprintf("%.2f", myUser.Two),
 		Three:            fmt.Sprintf("%.2f", myUser.Three),

@@ -410,6 +410,9 @@ message UserInfoReply {
 	string total = 5; // 累计收益
 	string buyType = 6; // 1，2，3 小中大 节点
 
+	string six = 18;
+	string seven = 19;
+
 	string balance = 12; // 币余额
 	string withdrawMin = 7; // 币最小提现
 	string withdrawRate = 10; // 币提现手续费
