@@ -759,8 +759,8 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 		tmpBuyType = "1"
 	}
 
-	now := time.Now()
-	tmpToday := time.Date(now.Year(), now.Month(), now.Day(), 16, 0, 0, 0, time.UTC).Unix()
+	now := time.Now().UTC()
+	tmpToday := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC).Unix()
 	tmpTotal := myUser.One + myUser.Two + myUser.Three + myUser.Four
 	return &v1.UserInfoReply{
 		Status:           "ok",
