@@ -734,19 +734,19 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 			} else {
 				tmpVip = 1
 			}
+		}
 
-			tmpLevel := uint64(1)
-			if 2000 <= myUser.Amount {
-				tmpLevel = 4
-			} else if 1000 <= myUser.Amount {
-				tmpLevel = 3
-			} else if 500 <= myUser.Amount {
-				tmpLevel = 2
-			}
+		tmpLevel := uint64(1)
+		if 2000 <= myUser.Amount {
+			tmpLevel = 4
+		} else if 1000 <= myUser.Amount {
+			tmpLevel = 3
+		} else if 500 <= myUser.Amount {
+			tmpLevel = 2
+		}
 
-			if tmpLevel > tmpVip {
-				tmpVip = tmpLevel
-			}
+		if tmpLevel > tmpVip {
+			tmpVip = tmpLevel
 		}
 	}
 
