@@ -420,6 +420,8 @@ message UserInfoReply {
 	string balanceUsdt = 13; // usdt余额
 	string withdrawMinUsdt = 8; // 最小提现usdt
 	string withdrawRateUsdt = 11; // 提现手续费usdt
+
+	uint64 a = 22;
 }
 
 message RewardListRequest {

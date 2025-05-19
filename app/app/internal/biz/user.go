@@ -763,6 +763,7 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 	tmpToday := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC).Unix()
 	tmpTotal := myUser.One + myUser.Two + myUser.Three + myUser.Four
 	return &v1.UserInfoReply{
+		A:                myUser.Amount,
 		Status:           "ok",
 		Today:            uint64(tmpToday),
 		Level:            tmpVip,

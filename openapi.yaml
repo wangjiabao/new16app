@@ -1151,6 +1151,8 @@ components:
                     type: string
                 withdrawRateUsdt:
                     type: string
+                a:
+                    type: string
         WithdrawListReply:
             type: object
             properties:
