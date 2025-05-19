@@ -870,7 +870,7 @@ func (uuc *UserUseCase) UserRecommend(ctx context.Context, req *v1.RecommendList
 
 			res = append(res, &v1.RecommendListReply_List{
 				Address: usersMap[vMyUserRecommend.UserId].Address,
-				Amount:  usersMap[vMyUserRecommend.UserId].AmountBiw + usersMap[vMyUserRecommend.UserId].Amount,
+				Amount:  fmt.Sprintf("%.2f", usersMap[vMyUserRecommend.UserId].MyTotalAmount+usersMap[vMyUserRecommend.UserId].AmountUsdt),
 			})
 		}
 
@@ -892,7 +892,7 @@ func (uuc *UserUseCase) UserRecommend(ctx context.Context, req *v1.RecommendList
 		TotalNum:         uint64(totalNum),
 		TotalTeamNum:     uint64(totalTeamNum),
 		RecommendAddress: addressRecommend,
-		TotalAmount:      fmt.Sprintf("%.2f", user.AmountUsdtOrigin),
+		TotalAmount:      fmt.Sprintf("%.2f", user.MyTotalAmount),
 		TotalTeam:        totalTeam,
 		Recommends:       res,
 	}, nil

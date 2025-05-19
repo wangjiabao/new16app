@@ -562,7 +562,7 @@ message RecommendListReply {
 	repeated List recommends = 1;
 	message List {
 		string address = 1; // 地址
-		uint64 amount = 2; // 金额
+		string amount = 2; // 金额
 	}
 }
 
