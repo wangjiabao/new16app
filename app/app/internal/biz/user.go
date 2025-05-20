@@ -460,8 +460,25 @@ func (uuc *UserUseCase) GetExistUserByAddressOrCreate(ctx context.Context, u *Us
 				return nil, errors.New(500, "USER_ERROR", "无效的推荐码1"), "无效的推荐码"
 			}
 
+			var (
+				configs []*Config
+				seven   uint64
+			)
+
+			// 配置
+			configs, err = uuc.configRepo.GetConfigByKeys(ctx,
+				"seven",
+			)
+			if nil != configs {
+				for _, vConfig := range configs {
+					if "seven" == vConfig.KeyName {
+						seven, _ = strconv.ParseUint(vConfig.Value, 10, 64)
+					}
+				}
+			}
+
 			// 持币
-			if 0 >= userRecommend.AmountUsdt {
+			if seven > uint64(userRecommend.AmountUsdt) {
 				return nil, errors.New(500, "USER_ERROR", "推荐人未激活"), "推荐人未激活"
 			}
 
