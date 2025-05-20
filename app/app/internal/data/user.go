@@ -1183,6 +1183,7 @@ func (u *UserRepo) GetUserByUserIdsTwo(ctx context.Context, userIds []int64) (ma
 		res[item.ID] = &biz.User{
 			ID:                     item.ID,
 			Address:                item.Address,
+			Amount:                 item.Amount,
 			AmountUsdtGet:          item.AmountUsdtGet,
 			AmountUsdt:             item.AmountUsdt,
 			AmountRecommendUsdtGet: item.AmountRecommendUsdtGet,
