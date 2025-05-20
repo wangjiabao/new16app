@@ -478,7 +478,7 @@ func (uuc *UserUseCase) GetExistUserByAddressOrCreate(ctx context.Context, u *Us
 			}
 
 			// 持币
-			if seven > uint64(userRecommend.AmountUsdt) {
+			if seven > uint64(userRecommend.AmountUsdtGet) {
 				return nil, errors.New(500, "USER_ERROR", "推荐人未激活"), "推荐人未激活"
 			}
 
