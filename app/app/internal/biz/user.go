@@ -778,13 +778,13 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 		tmpBuyType = "1"
 	}
 
-	now := time.Now().UTC()
+	now := time.Now().UTC().Add(8 * time.Hour)
 	tmpToday := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 	tmpTotal := myUser.One + myUser.Two + myUser.Three + myUser.Four
 	return &v1.UserInfoReply{
 		A:                myUser.Amount,
 		Status:           "ok",
-		Today:            uint64(tmpToday.Add(8 * time.Hour).Unix()),
+		Today:            uint64(tmpToday.Unix()),
 		Level:            tmpVip,
 		Six:              fmt.Sprintf("%.2f", myUser.AmountUsdt),
 		Seven:            fmt.Sprintf("%.2f", myUser.AmountUsdtGet),
