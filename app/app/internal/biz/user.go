@@ -663,6 +663,22 @@ func (uuc *UserUseCase) UpdateUserRecommend(ctx context.Context, u *User, req *v
 	return &v1.RecommendUpdateReply{InviteUserAddress: Address}, err
 }
 
+// get7AMIndex 以每天 UTC 7 点为分界线，返回当前时间属于哪个“7点周期”的时间戳（UTC 秒）
+func get7AMIndex() int64 {
+	// 获取当天 UTC 零点
+	utc := time.Now().UTC()
+	todayMidnight := time.Date(utc.Year(), utc.Month(), utc.Day(), 0, 0, 0, 0, time.UTC)
+	today7AM := todayMidnight.Add(7 * time.Hour)
+
+	if utc.Before(today7AM) {
+		// 属于前一天 7 点周期
+		return today7AM.Add(-24 * time.Hour).Unix()
+	} else {
+		// 属于今天 7 点周期
+		return today7AM.Unix()
+	}
+}
+
 func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoReply, error) {
 
 	var (
@@ -778,13 +794,11 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 		tmpBuyType = "1"
 	}
 
-	now := time.Now().UTC().Add(8 * time.Hour)
-	tmpToday := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 	tmpTotal := myUser.One + myUser.Two + myUser.Three + myUser.Four
 	return &v1.UserInfoReply{
 		A:                myUser.Amount,
 		Status:           "ok",
-		Today:            uint64(tmpToday.Unix()),
+		Today:            uint64(get7AMIndex()),
 		Level:            tmpVip,
 		Six:              fmt.Sprintf("%.2f", myUser.AmountUsdt),
 		Seven:            fmt.Sprintf("%.2f", myUser.AmountUsdtGet),
